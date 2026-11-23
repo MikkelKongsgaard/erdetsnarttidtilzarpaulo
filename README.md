@@ -4,7 +4,7 @@ Unofficial countdown to **19 November 2027, 20:00 Europe/Copenhagen** at Djursla
 
 The existing static website remains at the repository root. `countdown.js` supplies the countdown for both the website and the screensavers. `screensaver/shared/index.html` is the shared blue/white retro UI, bundled locally with that script. It uses system fonts, has no remote assets or links, and needs no network after installation. Windows needs WebView2 Runtime installed first.
 
-The favicon is an original geometric calendar/clock drawn in SVG, with no band artwork, logo, or third-party assets. The screensaver also uses only text and CSS. This is not an official band product.
+The favicon is a blue React-style atom on a black background, drawn in SVG at the user’s request. The screensaver uses only text and CSS, with no band artwork. This is not an official band product.
 
 ## Downloads and build status
 
