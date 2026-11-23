@@ -36,7 +36,7 @@ jobs:
           path: build/ZarPaulo-windows-x64.zip
           if-no-files-found: error
   macos:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - run: sh screensaver/macos/build.sh
