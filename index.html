@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f6ff">
   <meta name="description" content="Er det snart tid til Zar Paulo? Se nedtællingen til næste koncert.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <title>Er det snart tid til Zar Paulo?</title>
   <style>
     :root {
@@ -364,6 +365,12 @@
       </div>
 
       <aside class="side-panel">
+        <div class="panel-box" id="downloads">
+          <p class="panel-title">Screensaver // Downloads</p>
+          <p class="code">Offline nedtælling til Windows, macOS og Linux.</p>
+          <p><a class="btn" href="https://github.com/MikkelKongsgaard/erdetsnarttidtilzarpaulo/releases">GitHub Releases</a></p>
+          <p class="code">Pakker vises her, når en version er udgivet. Se installationsvejledningen i hver pakke.</p>
+        </div>
         <div class="mini-status"><span>Signalstyrke</span><span><span class="dot"></span></span></div>
         <div class="mini-status"><span>Genre</span><span>Indie / Rock / Kaos</span></div>
         <div class="mini-status"><span>Lokation</span><span>Aarhus C</span></div>
@@ -396,42 +403,8 @@ Hvornår det endelig bliver tid til Zar Paulo.</p>
 
   <footer>Lavet af en, der glæder sig lidt for meget. ♡</footer>
 
+  <script src="countdown.js"></script>
   <script>
-    const concertTime = new Date('2027-11-19T20:00:00+01:00').getTime();
-    const $ = (id) => document.getElementById(id);
-    const two = (n) => String(n).padStart(2, '0');
-
-    function render() {
-      const remaining = Math.max(0, concertTime - Date.now());
-      const totalSeconds = Math.floor(remaining / 1000);
-      const days = Math.floor(totalSeconds / 86400);
-      const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-
-      $('days').textContent = String(days).padStart(2, '0');
-      $('hours').textContent = two(hours);
-      $('minutes').textContent = two(minutes);
-      $('seconds').textContent = two(seconds);
-
-      if (remaining <= 0) {
-        $('answer').textContent = 'JA, FOR HELVEDE!';
-        $('sub').textContent = 'Koncerttilstand aktiveret. Bevæg dig mod arenaen. 🎸';
-        return;
-      }
-
-      if (days < 7) {
-        $('answer').textContent = 'ALARM: DET ER LIGE OM LIDT';
-        $('sub').textContent = 'Systemet registrerer akut nærhed til Zar Paulo.';
-      } else if (days < 30) {
-        $('answer').textContent = 'STATUS: DET NÆRMER SIG';
-        $('sub').textContent = 'Nedtællingsmodulet melder positiv udvikling.';
-      } else {
-        $('answer').textContent = 'STATUS: AFVENTER ZAR PAULO';
-        $('sub').textContent = 'Ventetid registreret. Begejstringen forbliver aktiv.';
-      }
-    }
-
     $('share').addEventListener('click', async () => {
       const url = location.href;
       if (navigator.share) {
@@ -451,8 +424,6 @@ Hvornår det endelig bliver tid til Zar Paulo.</p>
       }
     });
 
-    render();
-    setInterval(render, 1000);
   </script>
 </body>
 </html>

@@ -1,0 +1,91 @@
+name: Screensavers
+on:
+  pull_request:
+  push:
+    branches: [main, 'feat/**']
+    tags: ['screensaver-v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check countdown.js && node tests/countdown.cjs
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - shell: pwsh
+        run: |
+          dotnet publish screensaver/windows/ZarPaulo.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o build/windows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Rename-Item build/windows/ZarPaulo.exe ZarPaulo.scr
+          Copy-Item README.md build/windows/INSTALL.md
+          Compress-Archive build/windows/* build/ZarPaulo-windows-x64.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: build/ZarPaulo-windows-x64.zip
+          if-no-files-found: error
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh screensaver/macos/build.sh
+      - run: |
+          cp README.md build/macos/INSTALL.md
+          ditto -c -k --keepParent build/macos build/ZarPaulo-macos-universal.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-universal
+          path: build/ZarPaulo-macos-universal.zip
+          if-no-files-found: error
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libx11-dev xvfb
+      - run: sh screensaver/linux/build.sh
+      - name: X11 launch smoke test (not visual validation)
+        run: |
+          set +e
+          timeout 10s xvfb-run -a build/linux/zar-paulo > build/linux-smoke.log 2>&1
+          result=$?
+          cat build/linux-smoke.log
+          test "$result" = 124
+      - run: |
+          cp README.md build/linux/INSTALL.md
+          tar -C build -czf build/ZarPaulo-linux-x86_64.tar.gz linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86_64
+          path: build/ZarPaulo-linux-x86_64.tar.gz
+          if-no-files-found: error
+  release:
+    if: startsWith(github.ref, 'refs/tags/screensaver-v')
+    needs: [checks, windows, macos, linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: packages
+          merge-multiple: true
+      - name: Create draft release for human validation
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          cd packages
+          sha256sum *.zip *.tar.gz > SHA256SUMS
+          gh release create "$TAG" ./* --draft --title "$TAG" --notes 'Unsigned screensaver builds. Read INSTALL.md in each package. Platform installation and visual checks are required before publishing.'
